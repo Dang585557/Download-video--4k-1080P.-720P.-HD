@@ -1,111 +1,39 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ดาวน์โหลดวิดีโอออนไลน์ 4K 1080P 720P</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0077b6">
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(reg => console.log('Service Worker registered', reg))
-        .catch(err => console.log('Service Worker registration failed', err));
-    }
-  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ดาวน์โหลดวิดีโอ Facebook</title>
   <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background: linear-gradient(135deg, #00b4d8, #90e0ef);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      color: #0077b6;
-    }
-    .container {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(10px);
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-      text-align: center;
-      max-width: 500px;
-      width: 90%;
-      animation: fadeIn 1s ease-in-out;
-    }
-    input[type="text"] {
-      padding: 10px;
-      width: 80%;
-      border: 1px solid #0077b6;
-      border-radius: 8px;
-      margin-bottom: 20px;
-    }
-    button {
-      padding: 10px 20px;
-      background-color: #0077b6;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    .download-btn {
-      display: inline-block;
-      margin: 10px;
-      padding: 10px 20px;
-      background-color: #0096c7;
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-    }
-    .ads {
-      margin-top: 30px;
-      padding: 15px;
-      background-color: #caf0f8;
-      border-radius: 10px;
-    }
+    body { font-family: sans-serif; padding: 2rem; background: #f0f8ff; text-align: center; }
+    input, button { padding: 10px; font-size: 1rem; margin: 10px 0; width: 80%; max-width: 400px; }
+    .btn { background: #007bff; color: white; border: none; cursor: pointer; border-radius: 5px; }
+    .btn:hover { background: #0056b3; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>ดาวน์โหลดวิดีโอออนไลน์ 4K 1080P 720P</h1>
-    <input type="text" id="videoURL" placeholder="วางลิงก์วิดีโอที่นี่">
-    <br>
-    <button onclick="getVideo()">ดึงวิดีโอ</button>
-    <div id="result"></div>
-    <div class="ads">
-      <p>พื้นที่โฆษณาของคุณ ✨</p>
-      <!-- ใส่โฆษณา Google AdSense ได้ที่นี่ -->
-    </div>
-  </div>
-  <script>
-    async function getVideo() {
-      const url = document.getElementById('videoURL').value.trim();
-      const result = document.getElementById('result');
-      if (!url) {
-        result.innerHTML = '<p style="color:red;">กรุณาวางลิงก์ก่อน</p>';
-        return;
-      }
-      try {
-        const res = await fetch(`/api/getVideo?url=${encodeURIComponent(url)}`);
-        const data = await res.json();
+  <h1>ดาวน์โหลดวิดีโอ Facebook</h1>
+  <input type="text" id="fbUrl" placeholder="วางลิงก์ Facebook ที่นี่" />
+  <br />
+  <button class="btn" onclick="download()">ดึงลิงก์วิดีโอ</button>
+  <p id="result"></p>
 
-        if (data.formats) {
-          let html = '<h3>เลือกระดับความคมชัด:</h3>';
-          data.formats.forEach(format => {
-            if (format.ext === 'mp4' && format.url) {
-              html += `<a class="download-btn" href="${format.url}" target="_blank">${format.format_note || ''} - ${format.height || ''}p</a>`;
-            }
-          });
-          result.innerHTML = html;
+  <script>
+    async function download() {
+      const url = document.getElementById('fbUrl').value;
+      const result = document.getElementById('result');
+      result.innerHTML = 'กำลังดึงลิงก์...';
+
+      try {
+        const res = await fetch(`/api/fb?url=${encodeURIComponent(url)}`);
+        const data = await res.json();
+        if (data.download) {
+          result.innerHTML = `<a href="${data.download}" target="_blank">▶ ดาวน์โหลดวิดีโอ</a>`;
         } else {
-          result.innerHTML = '<p style="color:red;">ไม่สามารถดึงวิดีโอได้</p>';
+          result.innerHTML = '❌ ไม่สามารถดึงลิงก์ได้';
         }
-      } catch (error) {
-        console.error(error);
-        result.innerHTML = '<p style="color:red;">เกิดข้อผิดพลาด</p>';
+      } catch {
+        result.innerHTML = '⚠️ เกิดข้อผิดพลาด';
       }
     }
   </script>
