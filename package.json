@@ -1,7 +1,8 @@
 {
-  "name": "video-downloader",
+  "name": "fb-video-downloader",
   "version": "1.0.0",
-  "type": "module",
+  "description": "Simple Facebook video downloader using yt-dlp",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
