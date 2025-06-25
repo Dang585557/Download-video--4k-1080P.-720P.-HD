@@ -1,37 +1,31 @@
-import express from 'express';
-import { exec } from 'child_process';
+const express = require('express');
+const cors = require('cors');
+const { exec } = require('child_process');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static('public'));
+app.use(cors());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
 
-app.get('/api/video', (req, res) => {
+app.get('/api/fb', (req, res) => {
   const videoURL = req.query.url;
-  if (!videoURL) return res.status(400).json({ error: 'กรุณาระบุ URL' });
+  if (!videoURL || !videoURL.includes('facebook.com')) {
+    return res.status(400).json({ error: 'ลิงก์ไม่ถูกต้อง' });
+  }
 
-  const cmd = `yt-dlp -J "${videoURL}"`;
-  exec(cmd, (error, stdout, stderr) => {
-    if (error) {
-      console.error('เกิดข้อผิดพลาด:', stderr);
-      return res.status(500).json({ error: 'ไม่สามารถดึงข้อมูลวิดีโอได้' });
+  exec(`yt-dlp -f best -g "${videoURL}"`, (err, stdout, stderr) => {
+    if (err) {
+      console.error(stderr);
+      return res.status(500).json({ error: 'ไม่สามารถดึงวิดีโอได้' });
     }
-
-    try {
-      const info = JSON.parse(stdout);
-      const formats = info.formats.map(f => ({
-        url: f.url,
-        quality: f.qualityLabel || '',
-        ext: f.ext || ''
-      })).filter(f => f.url);
-
-      res.json({ formats });
-    } catch (e) {
-      res.status(500).json({ error: 'วิเคราะห์ข้อมูลผิดพลาด' });
-    }
+    const directLink = stdout.trim();
+    res.json({ download: directLink });
   });
 });
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
